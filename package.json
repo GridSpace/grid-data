@@ -1,0 +1,16 @@
+{
+    "name": "grid-data",
+    "version": "0.0.1",
+    "license": "MIT",
+    "author": "Stewart Allen <so@a3z.co>",
+    "keywords": "log analysis tool",
+    "repository": "github:gridspace/grid-data",
+    "files": [
+        "package.json"
+    ],
+    "dependencies": {
+        "gs-web-server": "^0.0.2",
+        "gs-log-util": "^0.0.2",
+        "gs-qtree": "^0.0.2"
+    }
+}

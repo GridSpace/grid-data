@@ -1,0 +1,169 @@
+body {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border: 0;
+    margin: 10px;
+    padding: 0;
+}
+div {
+    position: relative;
+}
+input {
+    padding: 2px;
+    margin: 2px;
+}
+label,input,textarea,select,#query-history,#query-output {
+    font-family: monospace;
+    white-space: nowrap;
+    resize: none;
+}
+input:focus,textarea:focus {
+    background-color: #eee;
+    outline: none;
+}
+select {
+    outline: none;
+}
+button {
+    outline: none;
+    border-radius: 4px;
+    margin: 1px 2px 2px 2px;
+}
+button:hover {
+    background-color: #ddd;
+}
+.panel {
+    border: 1px solid black;
+    padding: 5px;
+    margin: 5px;
+}
+.bg-dragover {
+    background-color: rgba(200,0,0,0.25);
+}
+.flash-green {
+  background-color: rgba(0,200,0,0.25);
+}
+.drag:hover {
+    background-color: #888;
+}
+.drag-vert {
+    min-height: 8px;
+    background-color: #eee;
+    margin: 0 5px 0 5px;
+}
+.drag-horz {
+    min-width: 8px;
+    background-color: #eee;
+    margin: 5px 0 5px 0;
+}
+.progress {
+    position: absolute;
+    right: 2px;
+    left: 2px;
+    top: 2px;
+    bottom: 2px;
+    border-radius: 3px;
+    border: 1px solid red;
+    background-color: rgba(255,0,0,0.25);
+    display: none;
+}
+
+#modal {
+    position: fixed;
+    display: none;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0,0,0,0.1);
+    z-index: 500;
+}
+#project label {
+    margin: 2px;
+    padding: 2px;
+}
+#project-load {
+    position: relative;
+}
+#project-pop {
+    display: none;
+    border: 3px solid white;
+    border-radius: 3px;
+    position: absolute;
+    transform: translateX(100%);
+    background-color: white;
+    z-index: 1000;
+    right: -3px;
+    top: 0;
+}
+#file-list {
+    height: 100%;
+    padding: 5px;
+    min-width: 100px;
+}
+#file-preview,#token-preview,#builder-preview,#query-output,#query-history {
+    overflow: auto;
+}
+#file-pre,#token-pre,#build-pre,#query-out {
+    max-height: 0;
+    margin: 5px;
+}
+#query-out {
+    max-width: 0;
+}
+#operators {
+    max-width: 50%
+}
+#tokenizer,#builder {
+    width: 400px;
+}
+#query-code {
+    white-space: normal;
+}
+#query-history {
+    height: 55px;
+}
+#query-history tr:hover {
+    background-color: #eee;
+}
+#query-output table td,#query-output table th {
+    border: 1px solid #ddd;
+    padding: 3px;
+    text-align: right;
+}
+
+.row {
+    display: flex;
+    flex-direction: row;
+}
+.col {
+    display: flex;
+    flex-direction: column;
+}
+.grow {
+    flex-grow: 1;
+}
+.space-around {
+    justify-content: space-around;
+}
+.space-between {
+    justify-content: space-between;
+}
+.items-center {
+    align-items: center;
+}
+.items-stretch {
+    align-items: stretch;
+}
+.content-center {
+    align-content: center;
+}
+.content-stretch {
+    align-content: stretch;
+}
+.text-center {
+    text-align: center;
+}
