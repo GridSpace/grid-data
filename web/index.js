@@ -1,5 +1,7 @@
 window.addEventListener('DOMContentLoaded', init);
 
+let window_size = null;
+let window_track = null;
 let file_limit = 10000000;
 let file_list = [];
 let file_workers = [];
@@ -61,6 +63,21 @@ function init() {
             sel.addRange(r);
             render_selection();
         }
+    };
+    window.onresize = (ev) => {
+        clearTimeout(window_track);
+        window_track = setTimeout(() => {
+            if (window.innerHeight !== window_size.height) {
+                if (confirm('reset window sizes?')) {
+                    delete storage.sizes;
+                    window.location.reload();
+                }
+            }
+        }, 10000);
+    };
+    window_size = {
+        width: window.innerWidth,
+        height: window.innerHeight
     };
     $('modal').onclick = modal_hide;
 }
@@ -505,6 +522,34 @@ function render_query_results(results) {
     });
     html.push('</table>');
     $('query-out').innerHTML = html.join('');
+    // graphing
+    if (results.meta.graph) {
+        let begin = 0;
+        let end = table.length;
+        if (header) {
+            begin++;
+        }
+        if (footer) {
+            end--;
+        }
+        let valcol = results.meta.graph[0];
+        let labelcol = results.meta.graph[1];
+        let period = results.meta.graph[2] || 0;
+        let max = Math.max.apply(0,table.map((r,i) => {
+            let val = r[valcol] || 0;
+            return (i >= begin && i < end) ? val : -Infinity
+        }));
+        let html = [''];
+        for (let i=begin; i<end; i++) {
+            let val = Math.round((table[i][valcol] / max) * 100);
+            let label = labelcol >= 0 ? `<label>${table[i][labelcol]}</label>` : '';
+            html.push(`<div style="height:${val}%">${label}</div>`);
+            if (period && (i-begin) % period === period - 1 && i !== end-1) {
+                html.push('<span></span>');
+            }
+        }
+        $('query-graph').innerHTML = html.join('');
+    }
 }
 
 function render_queries() {

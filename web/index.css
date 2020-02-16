@@ -134,6 +134,23 @@ button:hover {
     padding: 3px;
     text-align: right;
 }
+#query-graph {
+    align-items: flex-end;
+}
+#query-graph div {
+    flex-grow: 1;
+    background-color: #ccc;
+    border: 1px solid white;
+    writing-mode: vertical-rl;
+}
+#query-graph label {
+    display: block;
+    transform: rotate(180deg);
+    margin: 3px;
+}
+#query-graph span {
+    width: 4px;
+}
 
 .row {
     display: flex;
