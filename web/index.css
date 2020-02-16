@@ -140,11 +140,17 @@ button:hover {
 #query-graph div {
     flex-grow: 1;
     background-color: #ccc;
-    border: 1px solid white;
+    border-right: 1px solid white;
     writing-mode: vertical-rl;
+    flex-direction: column;
+    font-size: smaller;
+}
+#query-graph i {
+    flex-grow: 1;
+    text-align: right;
 }
 #query-graph label {
-    display: block;
+    display: flex;
     transform: rotate(180deg);
     margin: 3px;
 }

@@ -541,9 +541,11 @@ function render_query_results(results) {
         }));
         let html = [''];
         for (let i=begin; i<end; i++) {
-            let val = Math.round((table[i][valcol] / max) * 100);
-            let label = labelcol >= 0 ? `<label>${table[i][labelcol]}</label>` : '';
-            html.push(`<div style="height:${val}%">${label}</div>`);
+            let cval = table[i][valcol];
+            let pval = Math.round((cval / max) * 100);
+            let lval = labelcol >= 0 ? table[i][labelcol] : '';
+            let label = `<label>${lval}&nbsp;<i>${cval}</i></label>`;
+            html.push(`<div title="${lval} = ${cval}" style="height:${pval}%">${label}</div>`);
             if (period && (i-begin) % period === period - 1 && i !== end-1) {
                 html.push('<span></span>');
             }
