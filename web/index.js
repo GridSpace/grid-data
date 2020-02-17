@@ -442,7 +442,7 @@ function bind_workers() {
                     }
                     if (msg.emit && msg.emit.table) {
                         render_query_results(msg.emit);
-                        query_save();
+                        // query_save();
                         if (msg.time) {
                             console.log({query_rows: msg.emit.table.length, time_ms: msg.time});
                         }
@@ -523,7 +523,7 @@ function render_query_results(results) {
     html.push('</table>');
     $('query-out').innerHTML = html.join('');
     // graphing
-    if (results.meta.graph) {
+    if (meta.graph) {
         let begin = 0;
         let end = table.length;
         if (header) {
@@ -532,9 +532,9 @@ function render_query_results(results) {
         if (footer) {
             end--;
         }
-        let valcol = results.meta.graph[0];
-        let labelcol = results.meta.graph[1];
-        let period = results.meta.graph[2] || 0;
+        let valcol = meta.graph[0];
+        let labelcol = meta.keycol ? meta.keycol[0] : undefined;
+        let period = meta.graph[2] || 0;
         let max = Math.max.apply(0,table.map((r,i) => {
             let val = r[valcol] || 0;
             return (i >= begin && i < end) ? val : -Infinity

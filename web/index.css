@@ -136,6 +136,7 @@ button:hover {
 }
 #query-graph {
     align-items: flex-end;
+    overflow: auto;
 }
 #query-graph div {
     flex-grow: 1;
