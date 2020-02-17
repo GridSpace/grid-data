@@ -533,7 +533,7 @@ function render_query_results(results) {
             end--;
         }
         let valcol = meta.graph[0];
-        let labelcol = meta.keycol ? meta.keycol[0] : undefined;
+        let labelcol = meta.keycol ? meta.keycol[0] : meta.graph[1];
         let period = meta.graph[2] || 0;
         let max = Math.max.apply(0,table.map((r,i) => {
             let val = r[valcol] || 0;

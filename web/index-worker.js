@@ -138,7 +138,7 @@ function processor(files, data) {
                         let path = args.join('/');
                         postMessage({index, type, emit: path, progress});
                     }
-                    tree.insert.apply(tree,args);
+                    return tree.insert.apply(tree,args);
                 }
                 for (let i=0; i<tokens.length; i++) {
                     if (cancel) {
