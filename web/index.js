@@ -522,7 +522,7 @@ function render_query_results(results) {
     let vmax = Math.max.apply(0,vals.map(v => v === undefined ? -Infinity : v));
     let vmin = Math.min.apply(0,vals.map(v => v === undefined ? Infinity : v));
     let vdelta = vmax - vmin;
-    let color = meta.color;
+    let heat = meta.heat;
 
     let html = ['<table>'];
     if (table)
@@ -541,9 +541,12 @@ function render_query_results(results) {
                 keycol.indexOf(ci) >= 0
                 ? 'th' : 'td';
             let pct = cell === '' ? 0 : (cell-vmin) / vdelta;
-            let style = color && type === 'td' ?
-                ` style="background-color: rgba(100,100,100,${pct})"` : '';
-            html.push(`<${type}${style}>${cell}</${type}>`);
+            let text = pct < 0.7 ? "black" : "white";
+            let title = ` title="${cell}"`;
+            if (heat === 2 && type === 'td') cell = '';
+            let style = heat && type === 'td' ?
+                ` style="color:${text};background-color:rgba(100,100,100,${pct})"` : '';
+            html.push(`<${type}${title}${style}>${cell}</${type}>`);
         });
         html.push(`</tr>`);
     });
