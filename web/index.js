@@ -505,7 +505,11 @@ function render_query_results(results) {
     let footer = meta.footer;
     let keycol = meta.keycol || [];
     let html = ['<table>'];
+    if (table)
     table.forEach((row,ri) => {
+        if (!row) {
+            return;
+        }
         html.push(`<tr>`);
         row.forEach((cell,ci) => {
             if (cell === undefined) {
