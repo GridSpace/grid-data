@@ -504,6 +504,26 @@ function render_query_results(results) {
     let header = meta.header;
     let footer = meta.footer;
     let keycol = meta.keycol || [];
+
+    let rowbegin = 0;
+    let rowend = table.length;
+    if (header) {
+        rowbegin++;
+    }
+    if (footer) {
+        rowend--;
+    }
+    let vals = [].concat.apply(0,table.filter((r,ri) => (ri >= rowbegin && ri < rowend)).map((r,ri) => {
+        return r
+            .map((cv,ci) => {
+                return keycol.indexOf(ci) < 0 ? cv : undefined
+            });
+    }));
+    let vmax = Math.max.apply(0,vals.map(v => v === undefined ? -Infinity : v));
+    let vmin = Math.min.apply(0,vals.map(v => v === undefined ? Infinity : v));
+    let vdelta = vmax - vmin;
+    let color = meta.color;
+
     let html = ['<table>'];
     if (table)
     table.forEach((row,ri) => {
@@ -520,31 +540,38 @@ function render_query_results(results) {
                 (footer && ri === table.length -1) ||
                 keycol.indexOf(ci) >= 0
                 ? 'th' : 'td';
-            html.push(`<${type}>${cell}</${type}>`);
+            let pct = cell === '' ? 0 : (cell-vmin) / vdelta;
+            let style = color && type === 'td' ?
+                ` style="background-color: rgba(100,100,100,${pct})"` : '';
+            html.push(`<${type}${style}>${cell}</${type}>`);
         });
         html.push(`</tr>`);
     });
     html.push('</table>');
     $('query-out').innerHTML = html.join('');
+
     // graphing
     if (meta.graph) {
-        let begin = 0;
-        let end = table.length;
-        if (header) {
-            begin++;
-        }
-        if (footer) {
-            end--;
-        }
-        let valcol = meta.graph[0];
-        let labelcol = meta.keycol ? meta.keycol[0] : meta.graph[1];
-        let period = meta.graph[2] || 0;
+        let labelcol = meta.keycol ? meta.keycol[0] : undefined;
+        let valcol = undefined;
+        let period = 0;
+        meta.graph.forEach((v,i) => {
+            switch (typeof(v)) {
+                case 'number':
+                    valcol = v;
+                    break;
+                case 'object':
+                    labelcol = v.label || labelcol;
+                    period = v.period || period;
+                    break;
+            }
+        });
         let max = Math.max.apply(0,table.map((r,i) => {
             let val = r[valcol] || 0;
-            return (i >= begin && i < end) ? val : -Infinity
+            return (i >= rowbegin && i < rowend) ? val : -Infinity
         }));
         let html = [''];
-        for (let i=begin; i<end; i++) {
+        for (let i=rowbegin; i<rowend; i++) {
             let cval = table[i][valcol];
             let pval = Math.round((cval / max) * 100);
             let lval = labelcol >= 0 ? table[i][labelcol] : '';
