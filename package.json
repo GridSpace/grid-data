@@ -11,6 +11,6 @@
     "dependencies": {
         "gs-web-server": "^0.0.2",
         "gs-log-util": "^0.0.2",
-        "gs-qtree": "^0.0.3"
+        "gs-qtree": "^0.0.4"
     }
 }
