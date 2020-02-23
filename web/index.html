@@ -33,7 +33,10 @@
             </div>
             <div class="drag drag-vert"></div>
             <div id="tokenbox" class="row grow">
-                <div id="tokenizer" class="panel row"><textarea id="tokenizer-code" class="grow"></textarea></div>
+                <div id="tokenizer" class="panel row">
+                    <textarea id="tokenizer-code" class="grow"></textarea>
+                    <button id="token-code-save" class="saver">&rarr;</button>
+                </div>
                 <div class="drag drag-horz"></div>
                 <div id="token-preview" class="panel grow">
                     <pre id="token-pre"></pre>
@@ -42,7 +45,10 @@
             </div>
             <div class="drag drag-vert"></div>
             <div id="buildbox" class="row grow">
-                <div id="builder" class="panel row"><textarea id="builder-code" class="grow"></textarea></div>
+                <div id="builder" class="panel row">
+                    <textarea id="builder-code" class="grow"></textarea>
+                    <button id="build-code-save" class="saver">&rarr;</button>
+                </div>
                 <div class="drag drag-horz"></div>
                 <div id="builder-preview" class="panel grow">
                     <pre id="build-pre"></pre>
@@ -55,6 +61,7 @@
             <div class="row panel">
                 <input id="query-key"></input>
                 <textarea id="query-code" class="grow" rows=1></textarea>
+                <button onclick="query_do()">&rarr;</button>
                 <button onclick="query_save()">+</button>
             </div>
             <div id="querybox" class="col panel">

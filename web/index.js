@@ -318,6 +318,21 @@ function bind_drag() {
     });
 }
 
+function query_do() {
+    save_area($('query-code'));
+}
+
+function save_area(area) {
+    project_store.put(`text-${area.id}`, area.value);
+    area.blur();
+    area.classList.add('flash-green');
+    setTimeout(() => {
+        area.classList.remove('flash-green');
+        area.focus();
+    },100);
+    start_workers(area);
+}
+
 function bind_inputs() {
     [...document.getElementsByTagName('input')].forEach(input => {
         let store_key = `input-${input.id}`;
@@ -342,6 +357,12 @@ function bind_inputs() {
             input.value = value || defaults[store_key] || `no default for ${store_key}`;
         });
     });
+    $('token-code-save').onclick = () => {
+        save_area($('tokenizer-code'));
+    };
+    $('build-code-save').onclick = () => {
+        save_area($('builder-code'));
+    };
     [...document.getElementsByTagName('textarea')].forEach(area => {
         let store_key = `text-${area.id}`;
         area.setAttribute('spellcheck','false');
@@ -354,15 +375,8 @@ function bind_inputs() {
                 (event.key === 's' && meta) ||
                 (event.key === 'Enter' && meta);
             if (save) {
-                project_store.put(`text-${area.id}`, area.value);
-                area.blur();
-                area.classList.add('flash-green');
-                setTimeout(() => {
-                    area.classList.remove('flash-green');
-                    area.focus();
-                },100);
+                save_area(area);
                 event.preventDefault();
-                start_workers(area);
             } else if (event.key === 'Tab') {
                 if (event.shiftKey) {
                     // outdent
@@ -551,7 +565,10 @@ function render_query_results(results) {
         html.push(`</tr>`);
     });
     html.push('</table>');
+
     $('query-out').innerHTML = html.join('');
+    let qout = $('query-output');
+    qout.scrollTop = qout.scrollHeight;
 
     // graphing
     if (meta.graph) {
