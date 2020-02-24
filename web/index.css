@@ -84,8 +84,54 @@ button:hover {
     left: 0;
     right: 0;
     bottom: 0;
-    background-color: rgba(0,0,0,0.1);
     z-index: 500;
+    background-color: rgba(0,0,0,0.1);
+}
+#help-info {
+    margin: auto;
+    width: 600px;
+    background-color: white;
+    border: 10px solid rgba(100,100,100,0.95);
+    border-radius: 10px;
+    padding: 10px;
+    overflow-y: auto;
+    max-height: 75%;
+    top: 50px;
+}
+#project-impexp {
+    position: fixed;
+    display: none;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1000;
+}
+#project-impexp > div {
+    margin: auto;
+    width: 600px;
+    transform: translateY(50%);
+    background-color: white;
+    border: 10px solid rgba(100,100,100,0.95);
+    border-radius: 10px;
+    padding: 10px;
+}
+#project-impexp pre {
+    font-family: monospace;
+    word-break: break-all;
+    word-wrap: break-word;
+    white-space: normal;
+    overflow-y: auto;
+    height: 150px;
+    border: 1px dashed #888;
+}
+#exp-title {
+    display: flex;
+    flex-direction: row;
+}
+#exp-title label {
+    flex-grow: 1;
+    font-weight: bold;
 }
 #project label {
     margin: 2px;

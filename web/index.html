@@ -14,15 +14,23 @@
     <script src="index-db.js"></script>
 </head>
 <body class="col">
-    <div id="modal"></div>
+    <div id="modal">
+        <div id="help-info">helpful info</div>
+        <div id="project-impexp"><textarea></textarea></div>
+    </div>
     <div class="row grow">
         <div id="operators" class="col grow">
             <div id="project" class="row panel">
                 <label>project</label>
                 <input id="project-name" class="grow" placeholder="name"></input>
-                <!--<button id="project-del" onclick="project_delete()">-</button>-->
                 <button id="project-new" onclick="project_new()" title="new project">+</button>
-                <button id="project-load" onclick="project_load()" title="load project">^<div id="project-pop"></div></button>
+                <button id="project-del" onclick="project_delete()">-</button>
+                &nbsp;
+                <button id="project-exp" onclick="project_export()" title="export project">&uarr;</button>
+                <button id="project-exp" onclick="project_import()" title="import project">&darr;</button>
+                <button id="project-load" onclick="project_load()" title="load project">&rarr;<div id="project-pop"></div></button>
+                &nbsp;
+                <button id="help" onclick="help()" title="help">?</button>
             </div>
             <div id="filebox" class="row grow">
                 <div id="files" class="panel"><select id="file-list" multiple></select></div>

@@ -83,8 +83,66 @@ function init() {
 }
 
 function modal_hide() {
+    $('project-impexp').style.display = 'none';
     $('project-pop').style.display = 'none';
+    $('help-info').style.display = 'none';
     $('modal').style.display = 'none';
+}
+
+function help() {
+    let modal = $('modal');
+    let help = $('help-info');
+    help.style.display = 'block';
+    modal.style.display = 'block';
+}
+
+function project_export() {
+    let html = ['<div><div id="exp-title">',
+        '<label>project export data</label><button>x</button></div>',
+        '<pre id="exp">', JSON.stringify({
+            name: $('project-name').value,
+            token: $('tokenizer-code').value,
+            build: $('builder-code').value,
+            query: queries
+        }), '</pre><div><label id="exp-res"></label></div></div>'].join('');
+    let modal = $('modal');
+    let impexp = $('project-impexp');
+    impexp.innerHTML = html;
+    impexp.style.display = 'block';
+    modal.style.display = 'block';
+
+    let range = document.createRange();
+    range.selectNodeContents($('exp'));
+    let sel = window.getSelection();
+    sel.removeAllRanges();
+    sel.addRange(range);
+
+    let res = document.execCommand("copy");
+    $('exp-res').innerText = res ? "copied to clipboard" : "ctrl-c to copy to clipboard";
+}
+
+function project_import() {
+    let val = prompt("paste project data", '');
+    if (val) {
+        try {
+            let { name, token, build, query } = JSON.parse(val);
+            project_new(name);
+            setTimeout(() => {
+                console.log({name, token, build, query});
+                $('project-name').value = name;
+                $('tokenizer-code').value = token;
+                $('builder-code').value = build;
+                queries = query;
+                render_queries();
+                [...document.getElementsByTagName('textarea')].forEach(area => {
+                    if (area.id) save_area(area);
+                });
+            }, 100);
+        } catch (e) {
+            console.log(e);
+            alert("invalid project data");
+        }
+    }
 }
 
 function project_load() {
@@ -114,8 +172,8 @@ function project_load() {
     };
 }
 
-function project_new() {
-    let newproj = prompt("new project name");
+function project_new(newname) {
+    let newproj = newname || prompt("new project name");
     if (newproj) {
         let project_id = Math.round(Math.random() * 0xffffffffffffff).toString(36);
         alias[project_id] = newproj;
@@ -125,15 +183,22 @@ function project_new() {
 }
 
 function project_delete() {
-    // todo
+    let proj_id = storage.project;
+    let proj_name = alias[proj_id];
+    if (!confirm(`delete project "${proj_name || proj_id}"`)) {
+        return;
+    }
+    delete alias[proj_id];
+    storage.alias = JSON.stringify(alias);
+    storage.project = 'default';
+    location.reload();
 }
 
 function open(project) {
     storage.project = project;
     let name = alias[project] || project;
-    $('project-name').value = name;
 
-    console.log({project_open: project, desc: name});
+    console.log({open: project, description: name});
 
     file_workers.forEach((worker,index) => {
         worker.postMessage({
@@ -184,8 +249,8 @@ function set_height(el, dims) {
     storage.sizes = JSON.stringify(sizes);
 }
 
-function restore_window_contents() {
-    project_store.put("input-project-name", name);
+function restore_window_contents(name) {
+    $('query-graph').innerHTML = '';
 
     project_store.get("queries", qlist => {
         queries = qlist || [];
@@ -335,6 +400,7 @@ function save_area(area) {
 
 function bind_inputs() {
     [...document.getElementsByTagName('input')].forEach(input => {
+        if (!input.id) return;
         let store_key = `input-${input.id}`;
         input.setAttribute('spellcheck','false');
         input.setAttribute('autocomplete','off');
@@ -364,6 +430,7 @@ function bind_inputs() {
         save_area($('builder-code'));
     };
     [...document.getElementsByTagName('textarea')].forEach(area => {
+        if (!area.id) return;
         let store_key = `text-${area.id}`;
         area.setAttribute('spellcheck','false');
         area.onfocus = () => {
@@ -538,6 +605,8 @@ function render_query_results(results) {
     let vdelta = vmax - vmin;
     let heat = meta.heat;
 
+    let chain = meta.chain; // query chaining
+
     let html = ['<table>'];
     if (table)
     table.forEach((row,ri) => {
@@ -601,7 +670,10 @@ function render_query_results(results) {
                 html.push('<span></span>');
             }
         }
-        $('query-graph').innerHTML = html.join('');
+
+        let qgx = $('query-graph');
+        qgx.innerHTML = html.join('');
+        qgx.scrollLeft = qgx.scrollWidth;
     }
 }
 
