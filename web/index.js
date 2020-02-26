@@ -877,18 +877,25 @@ function handle_input(id, value) {
 }
 
 function start_workers(area) {
+    let flist = [];
+    let list = $('file-list');
+    [...list.options].forEach(opt => {
+        if (opt.selected) {
+            flist.push(opt.value);
+        }
+    });
     let type = area.id.split('-')[0];
     let code = area.value;
     switch (type) {
         case 'tokenizer':
-            files_store.keys(files => {
-                send_worker_jobs(type, code, files, file_workers);
-            });
+            // files_store.keys(files => {
+                send_worker_jobs(type, code, flist, file_workers);
+            // });
             break;
         case 'builder':
-            token_store.keys(files => {
-                send_worker_jobs(type, code, files, [ file_workers[0] ]);
-            });
+            // token_store.keys(files => {
+                send_worker_jobs(type, code, flist, [ file_workers[0] ]);
+            // });
             break;
         case 'query':
             send_worker_jobs(type, code, [42], [ file_workers[0] ]);

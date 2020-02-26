@@ -88,6 +88,7 @@ button:hover {
     background-color: rgba(0,0,0,0.1);
 }
 #help-info {
+    display: none;
     margin: auto;
     width: 600px;
     background-color: white;
