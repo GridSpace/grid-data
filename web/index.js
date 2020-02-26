@@ -45,11 +45,27 @@ function init() {
     alias = JSON.parse(storage.alias || "{}");
     open(storage.project || 'default');
     window.onkeydown = (ev) => {
-        if (ev.key === `Escape`) {
+        if (ev.key === 'Escape') {
             modal_hide();
-        }
+        } else
         if (ev.key === 'j' && (ev.metaKey || ev.ctrlKey)) {
             render_selection();
+        } else
+        if (ev.key === 'Delete' || ev.key === 'Backspace') {
+            let files = selected_files();
+            if (files.length && confirm(`delete ${files.length} files?`)) {
+                console.log({ delete:selected_files() });
+                function cb(ok) { console.log({ok}) }
+                files.forEach(file => {
+                    files_store.remove(file, cb);
+                    token_store.remove(file, cb);
+                    let find = file_list.indexOf(file);
+                    if (find >= 0) {
+                        file_list.splice(find,1);
+                    }
+                });
+                render_file_list();
+            }
         }
     };
     window.onclick = (ev) => {
@@ -278,6 +294,9 @@ function restore_window_contents(name) {
         files_store.keys(files => {
             file_list = files;
             render_file_list();
+            project_store.get("selected-files", files => {
+                select_files(files);
+            });
         });
     });
 }
@@ -695,20 +714,24 @@ function render_queries() {
 }
 
 function render_file_list() {
+    let list = $('file-list');
     let html = [];
     file_list
         .sort((a,b) => {
             return a < b ? -1 : 1;
         })
         .forEach(name => {
-            let sel = file_selected === name ? " selected" : "";
-            html.push(`<option value="${name}"${sel}>${name}</option>`);
+            html.push(`<option value="${name}">${name}</option>`);
         });
     if (html.length > 0) {
-        $('file-list').innerHTML = html.join('');
+        list.innerHTML = html.join('');
     } else {
-        $('file-list').innerHTML = "<option>file-drop</option>";
+        list.innerHTML = "<option>file-drop</option>";
     }
+    // force scroll to end of list
+    list.selectedIndex = file_list.length - 1;
+    list.selectedIndex = -1;
+    select_files([file_selected]);
 }
 
 function render_selection() {
@@ -754,6 +777,8 @@ function bind_file_list_actions() {
         let progeach = 1/readlen;
         let progress = 0;
         let errors = [];
+        let loaded = [];
+        let selected = selected_files();
 
         let set_bar = (pct) => {
             $('file-bar').style.display = pct ? "block" : "none";
@@ -822,6 +847,7 @@ function bind_file_list_actions() {
                         if (count < chunks.length - 1) {
                             save_chunk(count + 1);
                         } else {
+                            loaded.push(file_name);
                             check_more_files();
                         }
                     } else {
@@ -837,6 +863,11 @@ function bind_file_list_actions() {
             if (--readlen === 0) {
                 set_bar(0);
                 render_file_list();
+                if (evt.shiftKey) {
+                    start_workers($('tokenizer-code'), loaded);
+                    select_files(selected);
+                    select_files(loaded);
+                }
                 if (errors.length > 0) {
                     $('file-pre').innerText = errors.join('\n');
                 }
@@ -864,6 +895,7 @@ function bind_file_list_actions() {
             project_store.put("preview-file", preview);
             project_store.put("selected-file", file_selected);
         });
+        project_store.put("selected-files", selected_files());
     };
 }
 
@@ -876,25 +908,39 @@ function handle_input(id, value) {
     }
 }
 
-function start_workers(area) {
-    let flist = [];
+function select_files(files) {
+    let list = $('file-list');
+    [...list.options].forEach(opt => {
+        if (files.indexOf(opt.value) >= 0) {
+            opt.selected = true;
+        }
+    });
+}
+
+function selected_files() {
+    let files = [];
     let list = $('file-list');
     [...list.options].forEach(opt => {
         if (opt.selected) {
-            flist.push(opt.value);
+            files.push(opt.value);
         }
     });
+    return files;
+}
+
+function start_workers(area, flist) {
+    let files = flist || selected_files();
     let type = area.id.split('-')[0];
     let code = area.value;
     switch (type) {
         case 'tokenizer':
             // files_store.keys(files => {
-                send_worker_jobs(type, code, flist, file_workers);
+                send_worker_jobs(type, code, files, file_workers);
             // });
             break;
         case 'builder':
             // token_store.keys(files => {
-                send_worker_jobs(type, code, flist, [ file_workers[0] ]);
+                send_worker_jobs(type, code, files, [ file_workers[0] ]);
             // });
             break;
         case 'query':
