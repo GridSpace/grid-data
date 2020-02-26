@@ -45,13 +45,14 @@ function init() {
     alias = JSON.parse(storage.alias || "{}");
     open(storage.project || 'default');
     window.onkeydown = (ev) => {
+        let listfocus = document.activeElement === $('file-list');
         if (ev.key === 'Escape') {
             modal_hide();
         } else
         if (ev.key === 'j' && (ev.metaKey || ev.ctrlKey)) {
             render_selection();
         } else
-        if (ev.key === 'Delete' || ev.key === 'Backspace') {
+        if ((ev.key === 'Delete' || ev.key === 'Backspace') && listfocus) {
             let files = selected_files();
             if (files.length && confirm(`delete ${files.length} files?`)) {
                 console.log({ delete:selected_files() });
