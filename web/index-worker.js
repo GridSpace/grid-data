@@ -251,7 +251,7 @@ function processor(files, data) {
                                 text.substring(cur1+1)
                             ].join('');
                         }
-                        return res = current_tree.query(text);
+                        return res = current_tree.query(text, meta);
                     });
                     res = res ? res.result() : null;
                 } catch (err) {
