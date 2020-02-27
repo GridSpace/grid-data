@@ -76,6 +76,9 @@ button:hover {
     bottom: 5px;
     display: none;
 }
+.chain:hover {
+    background-color: #ddd;
+}
 
 #modal {
     position: fixed;

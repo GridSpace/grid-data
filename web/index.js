@@ -625,7 +625,15 @@ function render_query_results(results) {
     let vdelta = vmax - vmin;
     let heat = meta.heat;
 
-    let chain = meta.chain; // query chaining
+    let chain = [];
+
+    if (meta.chain) {
+        meta.chain.forEach(el => {
+            for (let [query, col] of Object.entries(el)) {
+                chain[col] = query;
+            }
+        });
+    }
 
     let html = ['<table>'];
     if (table)
@@ -649,6 +657,9 @@ function render_query_results(results) {
             if (heat === 2 && type === 'td') cell = '';
             let style = heat && type === 'td' ?
                 ` style="color:${text};background-color:rgba(100,100,100,${pct})"` : '';
+            if (cell && chain[ci]) {
+                cell = `<a class="chain" onclick="chain('${chain[ci]}','${cell}')">${cell}</a>`;
+            }
             html.push(`<${type}${title}${style}>${cell}</${type}>`);
         });
         html.push(`</tr>`);
@@ -929,20 +940,28 @@ function selected_files() {
     return files;
 }
 
-function start_workers(area, flist) {
+function chain(qname, sub) {
+    queries.forEach(query => {
+        if (query.key === qname) {
+            let code = query.code;
+            if (sub) {
+                code = [`meta.sub="${sub}"`,code].join('\n');
+            }
+            start_workers(undefined, undefined, code);
+        }
+    });
+}
+
+function start_workers(area, flist, dircode) {
     let files = flist || selected_files();
-    let type = area.id.split('-')[0];
-    let code = area.value;
+    let type = area ? area.id.split('-')[0] : 'query';
+    let code = area ? area.value : dircode || 'no-code';
     switch (type) {
         case 'tokenizer':
-            // files_store.keys(files => {
-                send_worker_jobs(type, code, files, file_workers);
-            // });
+            send_worker_jobs(type, code, files, file_workers);
             break;
         case 'builder':
-            // token_store.keys(files => {
-                send_worker_jobs(type, code, files, [ file_workers[0] ]);
-            // });
+            send_worker_jobs(type, code, files, [ file_workers[0] ]);
             break;
         case 'query':
             send_worker_jobs(type, code, [42], [ file_workers[0] ]);
