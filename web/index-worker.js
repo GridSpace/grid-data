@@ -24,7 +24,7 @@ let project_store = null;
 let current_tree = null;
 
 let util = {
-    millis_to_date: (ms) => {
+    millis_to_date: function(ms) {
         let time = new Date(ms);
         let yr = time.getFullYear().toString().substring(2,4);
         let mo = (time.getMonth()+1).toString().padStart(2,0);
@@ -36,7 +36,7 @@ let util = {
         return {yr, mo, da, hh, mm, ss, tzo};
     },
 
-    date_to_millis: (date) => {
+    date_to_millis: function(date) {
         let ss = 1000;
         let mm = ss * 60;
         let hh = mm * 60;
@@ -58,7 +58,49 @@ let util = {
             ms -= parseInt(date.tzo) * mm;
         }
         return ms;
-    }
+    },
+
+    parse_csv: function(line) {
+        let str = '';
+        let mark = 0;
+        let inside = null;
+        let toks = [];
+        for (let i=0; i<=line.length; i++) {
+            switch (line.charAt(i)) {
+                case '"':
+                    if (inside === '"') {
+                        str += line.substring(mark+1,i);
+                        inside = null;
+                    } else {
+                        inside = '"';
+                    }
+                    mark = i;
+                    break;
+                case '':
+                case ',':
+                    if (i - mark > 1) {
+                        str += line.substring(mark+1,i);
+                    }
+                    toks.push(str);
+                    mark = i;
+                    str = '';
+                    break;
+            }
+        }
+        let meta = this.meta;
+        if (meta.row === 0 || !meta.head) {
+            meta.head = toks;
+            return;
+        }
+        let head = meta.head;
+        let map = {};
+        for (let i=0; i<head.length; i++) {
+            map[head[i]] = toks[i];
+        }
+        return map;
+    },
+
+    meta: { }
 };
 
 function open(pid) {
@@ -96,6 +138,9 @@ function processor(files, data) {
         let cancel = false;
         let meta = {};
         let fn = null;
+
+        // set context for this work
+        util.meta = meta;
 
         if (files.length === 0) {
             postMessage({index, type, progress: 1, done: true});

@@ -39,6 +39,7 @@ let defaults = {
         "insert('d','e','f')"
     ].join('\n')
 };
+let ondone = {};
 
 function init() {
     bind_workers();
@@ -515,6 +516,11 @@ function bind_workers() {
                     if (msg.done) {
                         project_store.put('preview-tokens', div.innerText);
                         $('token-bar').style.display = "none";
+                        if (ondone.tokenizer) {
+                            let next = ondone.tokenizer;
+                            ondone.tokenizer = undefined;
+                            next();
+                        }
                     }
                     break;
                 case 'builder':
@@ -535,6 +541,11 @@ function bind_workers() {
                     if (msg.done) {
                         project_store.put('preview-build', div.innerText);
                         $('build-bar').style.display = "none";
+                        if (ondone.builder) {
+                            let next = ondone.builder;
+                            ondone.builder = undefined;
+                            next();
+                        }
                     }
                     break;
                 case 'query':
@@ -821,7 +832,13 @@ function bind_file_list_actions() {
                 errors.push(`no data returned for "${name}". may be too large (${file.size})`);
                 return check_more_files();
             }
-            let data = readdata.split('\n');
+            let splitter = '\n';
+            if (readdata.indexOf('\r\n') >= 0) {
+                splitter = '\r\n';
+            } else if (readdata.indexOf('\r') >= 0) {
+                splitter = '\r';
+            }
+            let data = readdata.split(splitter);
             let bytes_per_row = Math.ceil(file.size / data.length);
             let rows_per_file = Math.floor(file_limit / bytes_per_row);
             let chunk_count = Math.ceil(data.length / rows_per_file);
@@ -879,6 +896,12 @@ function bind_file_list_actions() {
                     start_workers($('tokenizer-code'), loaded);
                     select_files(selected);
                     select_files(loaded);
+                    ondone.tokenizer = () => {
+                        start_workers($('builder-code'));
+                    };
+                    ondone.builder = () => {
+                        start_workers($('query-code'));
+                    };
                 }
                 if (errors.length > 0) {
                     $('file-pre').innerText = errors.join('\n');
@@ -921,6 +944,7 @@ function handle_input(id, value) {
 }
 
 function select_files(files) {
+    if (!files) return;
     let list = $('file-list');
     [...list.options].forEach(opt => {
         if (files.indexOf(opt.value) >= 0) {
