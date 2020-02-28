@@ -78,6 +78,9 @@ let util = {
                     break;
                 case '':
                 case ',':
+                    if (inside) {
+                        continue;
+                    }
                     if (i - mark > 1) {
                         str += line.substring(mark+1,i);
                     }
