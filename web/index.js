@@ -115,14 +115,21 @@ function help() {
 }
 
 function project_export() {
+    let name = $('project-name').value;
+    let json = JSON.stringify({
+        name: name,
+        token: $('tokenizer-code').value,
+        build: $('builder-code').value,
+        query: queries
+    });
+    let blob = new Blob([json], {type: "octet/stream"});
+    let url = window.URL.createObjectURL(blob);
     let html = ['<div><div id="exp-title">',
-        '<label>project export data</label><button>x</button></div>',
-        '<pre id="exp">', JSON.stringify({
-            name: $('project-name').value,
-            token: $('tokenizer-code').value,
-            build: $('builder-code').value,
-            query: queries
-        }), '</pre><div><label id="exp-res"></label></div></div>'].join('');
+        '<label>project export data</label><button>x</button></div>','<pre id="exp">',
+        json,'</pre><div class="row"><label id="exp-res"></label>',
+        '<span class="grow"></span>',
+        `<button><a href="${url}" download="${name}.json">download</a></button>`,
+        '</div></div>'].join('');
     let modal = $('modal');
     let impexp = $('project-impexp');
     impexp.innerHTML = html;
@@ -136,11 +143,12 @@ function project_export() {
     sel.addRange(range);
 
     let res = document.execCommand("copy");
-    $('exp-res').innerText = res ? "copied to clipboard" : "ctrl-c to copy to clipboard";
+    let expres = $('exp-res');
+    expres.innerText = res ? "copied to clipboard" : "ctrl-c to copy to clipboard";
 }
 
-function project_import() {
-    let val = prompt("paste project data", '');
+function project_import(data) {
+    let val = data || prompt("paste project data", '');
     if (val) {
         try {
             let { name, token, build, query } = JSON.parse(val);
@@ -772,7 +780,39 @@ function render_selection() {
     }
 }
 
+function read_file(file, ondone, onprogress) {
+    let reader = new FileReader();
+    reader.onprogress = onprogress;
+    reader.onloadend = ondone;
+    reader.readAsBinaryString(file);
+}
+
 function bind_file_list_actions() {
+    let proj_name = $('project-name');
+
+    proj_name.addEventListener("dragover", (evt) => {
+        evt.stopPropagation();
+        evt.preventDefault();
+        evt.dataTransfer.dropEffect = 'copy';
+        proj_name.classList.add("bg-dragover");
+    });
+
+    proj_name.addEventListener("dragleave", (evt) => {
+        proj_name.classList.remove("bg-dragover");
+    });
+
+    proj_name.addEventListener("drop", (evt) => {
+        evt.stopPropagation();
+        evt.preventDefault();
+        proj_name.classList.remove("bg-dragover");
+        let file = evt.dataTransfer.files[0];
+        if (file && confirm(`import project file "${file.name}"?`)) {
+            read_file(file, (ev) => {
+                project_import(ev.target.result);
+            });
+        }
+    });
+
     let files = $('files');
 
     files.addEventListener("dragover", (evt) => {

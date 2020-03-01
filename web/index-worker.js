@@ -103,6 +103,61 @@ let util = {
         return map;
     },
 
+    parse: function(line, options) {
+        options = options || {
+            split: ",",
+            group: [ '""' ],
+            header: null
+        };
+        let splitter = options.split || ',';
+        let groups = options.group || [ '""' ];
+        let str = '';
+        let mark = 0;
+        let inside = null;
+        let toks = [];
+        for (let i=0; i<=line.length; i++) {
+            let char = line.charAt(i);
+            if (inside) {
+                for (let j=0; j<groups.length; j++) {
+                    if (char === groups[j][1]) {
+                        str += line.substring(mark+1,i);
+                        inside = null;
+                        mark = i;
+                        break;
+                    }
+                }
+            } else {
+                if (char === splitter || char === '') {
+                    if (i - mark > 1) {
+                        str += line.substring(mark+1,i);
+                    }
+                    toks.push(str);
+                    mark = i;
+                    str = '';
+                } else {
+                    for (let j=0; j<groups.length; j++) {
+                        if (char === groups[j][0]) {
+                            inside = groups[j][0];
+                            mark = i;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        let meta = this.meta;
+        let head = options.header || meta.head;
+        if (!head && meta.row === 0) {
+            meta.head = toks;
+            return;
+        }
+        let map = {};
+        for (let i=0; i<head.length; i++) {
+            map[head[i]] = toks[i];
+        }
+        return map;
+    },
+
     meta: { }
 };
 

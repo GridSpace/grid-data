@@ -35,6 +35,11 @@ button {
 button:hover {
     background-color: #ddd;
 }
+button a {
+    text-decoration: none;
+    font-weight: bold;
+    color: black;
+}
 .panel {
     border: 1px solid black;
     padding: 5px;
