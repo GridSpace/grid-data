@@ -724,6 +724,8 @@ function render_query_results(results) {
         let qgx = $('query-graph');
         qgx.innerHTML = html.join('');
         qgx.scrollLeft = qgx.scrollWidth;
+    } else {
+        $('query-graph').innerHTML = '';
     }
 }
 
@@ -913,10 +915,10 @@ function bind_file_list_actions() {
                 files_store.put(file_name, {file, data: file_data}, (ok, error) => {
                     // console.log({put:file_name, len:file_data.length, ok, error});
                     if (ok) {
+                        loaded.push(file_name);
                         if (count < chunks.length - 1) {
                             save_chunk(count + 1);
                         } else {
-                            loaded.push(file_name);
                             check_more_files();
                         }
                     } else {
