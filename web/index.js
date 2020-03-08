@@ -676,6 +676,9 @@ function render_query_results(results) {
             if (heat === 2 && type === 'td') cell = '';
             let style = heat && type === 'td' ?
                 ` style="color:${text};background-color:rgba(100,100,100,${pct})"` : '';
+            if (cell && meta.fixed) {
+                try { cell = cell.toFixed(meta.fixed) } catch (e) { }
+            }
             if (cell && chain[ci]) {
                 cell = `<a class="chain" onclick="chain('${chain[ci]}','${cell}')">${cell}</a>`;
             }
