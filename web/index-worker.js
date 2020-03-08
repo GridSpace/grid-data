@@ -288,7 +288,7 @@ function processor(files, data) {
                     try {
                         fn(tokens[i], insert, done, util);
                     } catch (error) {
-                        console.log(error);
+                        console.log(error, tokens[i]);
                         return postMessage({index, type, progress: 1, done: true, error});
                     }
                     proginc = (each * fnext + (i / tokens.length) * each) - progress;
