@@ -1,5 +1,6 @@
 importScripts("index-db.js");
 importScripts("qtree.js");
+importScripts("moment.js");
 
 self.onmessage = (event) => {
     if (!event.data) {
@@ -24,6 +25,8 @@ let project_store = null;
 let current_tree = null;
 
 let util = {
+    moment: moment,
+
     millis_to_date: function(ms) {
         let time = new Date(ms);
         let yr = time.getFullYear().toString().substring(2,4);
@@ -44,9 +47,9 @@ let util = {
         let yr = parseInt(date.yr) + 2000;
         let mo = parseInt(date.mo) - 1;
         let mos = [31, yr % 4 === 0 ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
-        let ms = parseInt(date.ss) * ss;
-        ms += parseInt(date.mm) * mm;
-        ms += parseInt(date.hh) * hh;
+        let ms = parseInt(date.ss || 0) * ss;
+        ms += parseInt(date.mm || 0) * mm;
+        ms += parseInt(date.hh || 0) * hh;
         ms += (parseInt(date.da) - 1) * da;
         while (mo-- > 0) {
             ms += mos[mo] * da;
@@ -197,9 +200,6 @@ function processor(files, data) {
         let meta = {};
         let fn = null;
 
-        // set context for this work
-        util.meta = meta;
-
         if (files.length === 0) {
             postMessage({index, type, progress: 1, done: true});
             return;
@@ -213,6 +213,7 @@ function processor(files, data) {
         postMessage({type, clear: true});
         let each = 1.0 / files.length;
 
+        // ---- TOKENIZER ----
         let next_tokens = () => {
             let file = files[fnext];
             files_store.get(file, info => {
@@ -267,9 +268,11 @@ function processor(files, data) {
             });
         };
 
+        // ---- BUILDER ----
         let tree = null;
-        let next_trees = () => {
-            token_store.get(files[fnext], tokens => {
+        let next_build = () => {
+            let file = files[fnext];
+            token_store.get(file, tokens => {
                 if (!tree) {
                     tree = new Node();
                 }
@@ -286,7 +289,12 @@ function processor(files, data) {
                         break;
                     }
                     try {
-                        fn(tokens[i], insert, done, util);
+                        meta.files = files;
+                        meta.file = file;
+                        meta.rows = tokens.length;
+                        meta.row = i;
+                        fn(tokens[i], insert, done, meta, util);
+                        meta.index += 1;
                     } catch (error) {
                         console.log(error, tokens[i]);
                         return postMessage({index, type, progress: 1, done: true, error});
@@ -307,15 +315,15 @@ function processor(files, data) {
                         }
                     });
                 } else {
-                    next_trees();
+                    next_build();
                 }
             });
         };
 
         switch (type) {
             case 'tokenizer':
-                meta.index = 0;
                 try {
+                    meta.index = 0;
                     fn = new Function('line,emit,done,meta,util', code);
                 } catch (error) {
                     return postMessage({index, type, progress: 1, done: true, error});
@@ -323,11 +331,12 @@ function processor(files, data) {
                 return next_tokens();
             case 'builder':
                 try {
-                    fn = new Function('tokens,insert,done,util', code);
+                    meta.index = 0;
+                    fn = new Function('tokens,insert,done,meta,util', code);
                 } catch (error) {
                     return postMessage({index, type, progress: 1, done: true, error});
                 }
-                return next_trees();
+                return next_build();
             case 'query':
                 if (!current_tree) {
                     postMessage({
