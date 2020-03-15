@@ -14,4 +14,11 @@ module.exports = (server) => {
 
     // server "web" dir at the root of "/data"
     path.static(moddir + "/web", "/data");
+
+    // add path remapping
+    // path.full({
+    //     "/data/" : path.redir("/data"),
+    //     "/data"  : path.remap("/data.html")
+    // });
+
 };
