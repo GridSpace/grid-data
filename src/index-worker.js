@@ -1,6 +1,6 @@
-importScripts("index-db.js");
-importScripts("qtree.js");
-importScripts("moment.js");
+importScripts("/code/data-index-db.js");
+importScripts("/code/data-qtree.js");
+importScripts("/code/data-moment.js");
 
 self.onmessage = (event) => {
     if (!event.data) {

@@ -495,10 +495,7 @@ function bind_inputs() {
 
 function bind_workers() {
     file_workers.push(
-        // new Worker("index-worker.js"),
-        // new Worker("index-worker.js"),
-        // new Worker("index-worker.js"),
-        new Worker("index-worker.js")
+        new Worker("/code/data-worker.js")
     );
 
     file_workers.forEach(worker => {
