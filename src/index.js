@@ -938,6 +938,7 @@ function bind_file_list_actions() {
                     start_workers($('tokenizer-code'), loaded);
                     select_files(selected);
                     select_files(loaded);
+                    project_store.put("selected-files", selected_files());
                     ondone.tokenizer = () => {
                         start_workers($('builder-code'));
                     };
