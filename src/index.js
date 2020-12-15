@@ -39,6 +39,10 @@ let defaults = {
         "insert('d','e','f')"
     ].join('\n')
 };
+let edit = {
+    token: undefined,
+    build: undefined
+};
 let ondone = {};
 
 function init() {
@@ -83,6 +87,7 @@ function init() {
         }
     };
     window.onresize = (ev) => {
+        return;
         clearTimeout(window_track);
         window_track = setTimeout(() => {
             if (window.innerHeight !== window_size.height) {
@@ -98,6 +103,14 @@ function init() {
         height: window.innerHeight
     };
     $('modal').onclick = modal_hide;
+
+    edit.build = ace.edit($("ace-code"), {
+        mode: "ace/mode/javascript",
+        theme: "ace/theme/chrome",
+        selectionStyle: "text"
+    });
+    edit.build.session.setTabSize(2);
+    edit.build.session.setUseSoftTabs(true);
 }
 
 function modal_hide() {
@@ -119,7 +132,8 @@ function project_export() {
     let json = JSON.stringify({
         name: name,
         token: $('tokenizer-code').value,
-        build: $('builder-code').value,
+        // build: $('builder-code').value,
+        build: edit.build.session.getValue(),
         query: queries
     });
     let blob = new Blob([json], {type: "octet/stream"});
@@ -157,7 +171,8 @@ function project_import(data) {
                 console.log({name, token, build, query});
                 $('project-name').value = name;
                 $('tokenizer-code').value = token;
-                $('builder-code').value = build;
+                // $('builder-code').value = build;
+                edit.build.session.setValue(build),
                 queries = query;
                 render_queries();
                 [...document.getElementsByTagName('textarea')].forEach(area => {
@@ -455,9 +470,24 @@ function bind_inputs() {
     $('token-code-save').onclick = () => {
         save_area($('tokenizer-code'));
     };
-    $('build-code-save').onclick = () => {
-        save_area($('builder-code'));
-    };
+    // $('build-code-save').onclick = () => {
+    //     save_area($('builder-code'));
+    // };
+    project_store.get('text-builder-code', value => {
+        edit.build.session.setValue(value || defaults['text-builder-code'] || '');
+        edit.build.commands.addCommand({
+            name: 'save',
+            bindKey: {win: 'Ctrl-S',  mac: 'Command-S'},
+            exec: function(editor) {
+                let code = edit.build.session.getValue();
+                project_store.put(`text-builder-code`, code);
+                start_workers({
+                    id: "builder",
+                    value: code
+                });
+            }
+        });
+    });
     [...document.getElementsByTagName('textarea')].forEach(area => {
         if (!area.id) return;
         let store_key = `text-${area.id}`;
@@ -940,7 +970,11 @@ function bind_file_list_actions() {
                     select_files(loaded);
                     project_store.put("selected-files", selected_files());
                     ondone.tokenizer = () => {
-                        start_workers($('builder-code'));
+                        // start_workers($('builder-code'));
+                        start_workers({
+                            id: "builder",
+                            value: edit.build.session.getValue()
+                        });
                     };
                     ondone.builder = () => {
                         start_workers($('query-code'));

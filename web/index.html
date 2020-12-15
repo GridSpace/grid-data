@@ -13,6 +13,7 @@
     <script src="/code/data-index.js"></script>
     <script src="/code/data-index-db.js"></script>
     <script src="/code/space.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.12/ace.js"></script>
 </head>
 <body class="col">
     <div id="modal">
@@ -54,8 +55,9 @@
             </div>
             <div class="drag drag-vert"></div>
             <div id="buildbox" class="row grow">
-                <div id="builder" class="panel row">
-                    <textarea id="builder-code" class="grow"></textarea>
+                <div id="builder" class="panel col">
+                    <div class="col grow"><div id="ace-code"></div></div>
+                    <!-- <textarea id="builder-code" class="grow"></textarea> -->
                     <button id="build-code-save" class="saver">&rarr;</button>
                 </div>
                 <div class="drag drag-horz"></div>
