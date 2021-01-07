@@ -467,18 +467,13 @@ function bind_inputs() {
             input.value = value || defaults[store_key] || `no default for ${store_key}`;
         });
     });
-    $('token-code-save').onclick = () => {
-        save_area($('tokenizer-code'));
-    };
-    // $('build-code-save').onclick = () => {
-    //     save_area($('builder-code'));
-    // };
+    let code_save;
     project_store.get('text-builder-code', value => {
         edit.build.session.setValue(value || defaults['text-builder-code'] || '');
         edit.build.commands.addCommand({
             name: 'save',
             bindKey: {win: 'Ctrl-S',  mac: 'Command-S'},
-            exec: function(editor) {
+            exec: code_save = function(editor) {
                 let code = edit.build.session.getValue();
                 project_store.put(`text-builder-code`, code);
                 start_workers({
@@ -488,6 +483,12 @@ function bind_inputs() {
             }
         });
     });
+    $('token-code-save').onclick = () => {
+        save_area($('tokenizer-code'));
+    };
+    $('build-code-save').onclick = () => {
+        code_save();
+    };
     [...document.getElementsByTagName('textarea')].forEach(area => {
         if (!area.id) return;
         let store_key = `text-${area.id}`;
