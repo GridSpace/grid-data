@@ -763,7 +763,10 @@ function render_query_results(results) {
 function render_queries() {
     let html = ['<table>'];
     if (queries.length) {
-        queries.forEach((query,qi) => {
+        let sorted = queries.sort((a,b) => {
+            return a.key < b.key ? -1 : 1;
+        });
+        sorted.forEach((query,qi) => {
             html.push(`<tr onclick="query_select(${qi})">`);
             html.push(`<th>${query.key}</th><td>${query.code}</td>`);
             html.push(`<td width=100%></td><td><button onclick="query_delete(${qi},event)">x</button></td`);
