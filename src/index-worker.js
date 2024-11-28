@@ -273,12 +273,12 @@ function processor(files, data) {
         let next_build = () => {
             let file = files[fnext];
             token_store.get(file, tokens => {
-                if (!tokens) {
-                    console.log('no tokens, file =', file);
-                    return;
-                }
                 if (!tree) {
                     tree = new Node();
+                }
+                if (!tokens) {
+                    console.log('no tokens, file =', file);
+                    // return;
                 }
                 function insert() {
                     let args = [...arguments];
@@ -288,6 +288,7 @@ function processor(files, data) {
                     }
                     return tree.insert.apply(tree,args);
                 }
+                if (tokens && tokens.length)
                 for (let i=0; i<tokens.length; i++) {
                     if (cancel) {
                         break;
