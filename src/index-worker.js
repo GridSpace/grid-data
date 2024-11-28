@@ -244,8 +244,8 @@ function processor(files, data) {
                             fn(line, emit, done, meta, util);
                             meta.index += 1;
                         } catch (error) {
-                            console.log(error);
-                            return postMessage({index, type, progress: 1, done: true, error});
+                            console.log({ line, error });
+                            // return postMessage({index, type, progress: 1, done: true, error});
                         }
                     }
                 }
@@ -273,6 +273,10 @@ function processor(files, data) {
         let next_build = () => {
             let file = files[fnext];
             token_store.get(file, tokens => {
+                if (!tokens) {
+                    console.log('no tokens, file =', file);
+                    return;
+                }
                 if (!tree) {
                     tree = new Node();
                 }
